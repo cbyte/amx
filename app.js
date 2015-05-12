@@ -7,5 +7,5 @@ app.get('/', function(req,res){
 
 app.use(express.static(__dirname + '/public'));
 
-app.listen(80)
+app.listen(2222)
 console.log('Listening.')

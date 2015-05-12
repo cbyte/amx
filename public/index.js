@@ -12,11 +12,18 @@ if (window.DeviceMotionEvent) {
 }
 
 function handlerDeviceOrientation(e) {
-	document.getElementById("logOrientation").innerHTML = 'orientation: ' + JSON.stringify(e)
-	//document.getElementById("logOrientation").innerHTML = "roll:" + e.gamma+ " pitch: " + e.beta + "yaw: "+ e.alpha
+	var debug = "roll:" + Math.round(e.gamma) + "\n"
+                  + "pitch: " + Math.round(e.beta) + "\n"
+                  + "yaw: "+ Math.round(e.alpha) + "\n"
+        document.getElementById("logOrientation").innerHTML = debug
+        var color = "hsl("+Math.round(e.alpha)+", 100%, 70%);"
+        document.body.style.backgroundColor = color
 }
 
 function handlerDeviceMotion(e) {
-	document.getElementById("logMotion").innerHTML = 'motion' + JSON.stringify(e)
-	//document.getElementById("logMotion").innerHTML = "acceleration: " + JSON.stringify(e.acceleration) + " acceleration with gravity: " + JSON.stringify(e.accelerationIncludingGravity) + " rotation rate: " + JSON.stringify(e.rotationRate) + " refresh interval: " + e.interval;
+        var debug = "acceleration (X,Y,Z): " + Math.round(e.acceleration.x) + ", " + Math.round(e.acceleration.y)+ ", " + Math.round(e.acceleration.z) + "\n"
+                  + "acceleration with gravity (X,Y,Z): " + Math.round(e.accelerationIncludingGravity.x) + ", " + Math.round(e.accelerationIncludingGravity.y)+ ", " + Math.round(e.accelerationIncludingGravity.z) + "\n"
+                  + "rotation rate (X,Y,Z): " + Math.round(e.rotationRate.beta) + ', ' + Math.round(e.rotationRate.gamma) + ', ' + Math.round(e.rotationRate.alpha) + "\n"
+                  + "refresh interval: " + e.interval
+	document.getElementById("logMotion").innerHTML = debug
 }
