@@ -12,9 +12,11 @@ if (window.DeviceMotionEvent) {
 }
 
 function handlerDeviceOrientation(e) {
-	document.getElementById("logOrientation").innerHTML = "roll:" + e.gamma+ " pitch: " + e.beta + "yaw: "+ e.alpha
+	document.getElementById("logOrientation").innerHTML = 'orientation: ' + JSON.stringify(e)
+	//document.getElementById("logOrientation").innerHTML = "roll:" + e.gamma+ " pitch: " + e.beta + "yaw: "+ e.alpha
 }
 
 function handlerDeviceMotion(e) {
-	document.getElementById("logMotion").innerHTML = "acceleration: " + JSON.stringfy(e.acceleration) + " acceleration with gravity: " + JSON.stringify(e.accelerationIncludingGravity) + " rotation rate: " + JSON.stringify(e.rotationRate) + " refresh interval: " + e.interval;
+	document.getElementById("logMotion").innerHTML = 'motion' + JSON.stringify(e)
+	//document.getElementById("logMotion").innerHTML = "acceleration: " + JSON.stringify(e.acceleration) + " acceleration with gravity: " + JSON.stringify(e.accelerationIncludingGravity) + " rotation rate: " + JSON.stringify(e.rotationRate) + " refresh interval: " + e.interval;
 }
