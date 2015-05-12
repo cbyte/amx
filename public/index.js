@@ -6,7 +6,7 @@ if (window.DeviceOrientationEvent) {
 }
 
 if (window.DeviceMotionEvent) {
-	window.addEventListener('deviceorientation', handlerDeviceMotion, false);
+	window.addEventListener('devicemotion', handlerDeviceMotion, false);
 } else {
 	document.getElementById("logMotion").innerHTML = "Error: No Device Motion API"
 }
