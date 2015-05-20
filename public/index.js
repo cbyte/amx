@@ -17,12 +17,12 @@ function handlerDeviceOrientation(e) {
             + "pitch: " + Math.round(e.beta) + "\n"
             + "yaw: "+ Math.round(e.alpha) + "\n"
   document.getElementById("logOrientation").innerHTML = debug
-  var h = min((e.alpha + 0.4 * e.beta - 0.4 * e.gamma)/360), 1);
+  var h = Math.min(((e.alpha + 0.4 * e.beta - 0.4 * e.gamma)/360), 1);
   var color = hslToHex(h, 1, 0.65) //"hsl("+h+", 100%, 65%);"
   document.body.style.background = color
   socket.emit('orientation', {roll: Math.round(e.gamma),
-    pitch: Math.round(e.beta),
-    yaw: Math.round(e.alpha)});
+              pitch: Math.round(e.beta),
+              yaw: Math.round(e.alpha)});
 }
 
 function handlerDeviceMotion(e) {
