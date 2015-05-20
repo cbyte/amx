@@ -1,4 +1,4 @@
-var socket = io.connect('http://test.chocobyte.com');
+var socket = io.connect('141.83.177.24:2222'); // server address
 
 if (window.DeviceOrientationEvent) {
   window.addEventListener('deviceorientation', handlerDeviceOrientation, false);
@@ -17,9 +17,13 @@ function handlerDeviceOrientation(e) {
             + "pitch: " + Math.round(e.beta) + "\n"
             + "yaw: "+ Math.round(e.alpha) + "\n"
   document.getElementById("logOrientation").innerHTML = debug
-  var color = "hsl("+e.alpha+", 100%, 70%);"
+  var h = e.alpha + 0.4 * e.beta - 0.4 * e.gamma;
+  if (h > 360) h = 360;
+  var color = "hsl("+e.alpha+", 100%, 65%);"
   document.body.style.backgroundColor = color
-  socket.emit('orientation', {roll: e.gamma, pitch: e.beta, yaw: e.alpha});
+  socket.emit('orientation', {roll: Math.round(e.gamma),
+    pitch: Math.round(e.beta),
+    yaw: Math.round(e.alpha)});
 }
 
 function handlerDeviceMotion(e) {
