@@ -1,7 +1,5 @@
-# amx
-Ambient Musix
-
-pre-alpha!
+# Zukunftsmusik
+Zukunftsmusik pre-alpha!
 
 # Prerequisites for easymidi
 ## OSX

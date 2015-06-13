@@ -1,4 +1,7 @@
-var socket = io.connect('141.83.177.24:2222'); // server address
+var socket = io.connect('192.168.178.38'); // server address
+var touch = false
+var attachFastClick = Origami.fastclick;
+attachFastClick(document.body);
 
 if (window.DeviceOrientationEvent) {
   window.addEventListener('deviceorientation', handlerDeviceOrientation, false);
@@ -12,7 +15,20 @@ if (window.DeviceMotionEvent) {
   document.getElementById("logMotion").innerHTML = "Error: No Device Motion API"
 }
 
+window.addEventListener('touchstart', function(e) {
+  e.preventDefault();
+  touch = true
+  document.getElementById("logMotion").innerHTML = "active"
+}, false)
+window.addEventListener('touchend', function(e) {
+  e.preventDefault();
+  touch = false
+  socket.emit(' noteoff')
+  document.getElementById("logMotion").innerHTML = "inactive"
+}, false)
+
 function handlerDeviceOrientation(e) {
+
   var debug = "roll:" + Math.round(e.gamma) + "\n"
             + "pitch: " + Math.round(e.beta) + "\n"
             + "yaw: "+ Math.round(e.alpha) + "\n"
@@ -20,9 +36,13 @@ function handlerDeviceOrientation(e) {
   var h = Math.min(((e.alpha + 0.4 * e.beta - 0.4 * e.gamma)/360), 1);
   var color = hslToHex(h, 1, 0.65) //"hsl("+h+", 100%, 65%);"
   document.body.style.background = color
-  socket.emit('orientation', {roll: Math.round(e.gamma),
-              pitch: Math.round(e.beta),
-              yaw: Math.round(e.alpha)});
+  if (touch == true) {
+    socket.emit('orientation', {roll: Math.round(e.gamma),
+                pitch: Math.round(e.beta),
+                yaw: Math.round(e.alpha)});
+  } else {
+    socket.emit('noteoff')
+  }
 }
 
 function handlerDeviceMotion(e) {

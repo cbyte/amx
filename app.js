@@ -12,12 +12,19 @@ useless. Instead, select the second device.
 Hint: If there is no second device, the app will crash.
 Use a Virtual MIDI device, e.g. loopmidi
 */
+var midiDeviceID = 1; // edit ID to use the desired device
 var outputs = midi.getOutputs();
-console.log(outputs);
-var output = new midi.Output(outputs[1], false);
+console.log('Connected MIDI-interfaces: ' + outputs)
 
-server.listen(2222)
-console.log('Listening on Port 2222.')
+try{
+	var output = new midi.Output(outputs[midiDeviceID], false)
+	console.log('Using ' + outputs[midiDeviceID] + ' as MIDI-output-interface.')
+} catch(e) {
+	console.log('MIDI-output ' + midiDeviceID + ' could not be initiated. ' + e)
+}
+
+server.listen(80);
+console.log('Listening on Port 80.');
 
 
 app.get('/', function(req,res){
@@ -31,37 +38,51 @@ var counter = 0;
 
 io.on('connection', function(socket) {
 	socket.on('orientation', function (data) {
-		if (lastNote != Math.round(63 + data.pitch/(180/64))){
-			counter = 0;
-			console.log('received orientation data');
-			console.dir(data);
-			// adjust the expression pedal value of the whammy
-			output.send('noteon', {
-				note: Math.round(63 + data.pitch/(180/64)),
-				//value: Math.round(data.yaw/(360/127)),
-				velocity: 127,
-				channel: 0
-			})
-			output.send('noteoff', {
-				note: lastNote,
-				//value: Math.round(data.yaw/(360/127)),
-				velocity: 127,
-				channel: 0
-			})
-			lastNote = Math.round(63 + data.pitch/(180/64));
-			console.log('sent noteon');
-		} else {
-			counter++;
-			if (counter > 100){
+		console.log('received orientation data');
+		var currentNote = Math.round(63 + data.pitch/2.8125) // 180/64
+
+		try{
+			if (lastNote != currentNote){
 				counter = 0;
-				output.send('noteoff', {
-					note: lastNote,
-					//value: Math.round(data.yaw/(360/127)),
+				console.dir(data);
+				output.send('noteon', {
+					note: currentNote,
 					velocity: 127,
 					channel: 0
 				})
-				console.log('sent noteoff');
-			}
+				output.send('noteoff', {
+					note: lastNote,
+					velocity: 127,
+					channel: 0
+				})
+				lastNote = currentNote;
+				console.log('sent noteon');
+			} /*else {
+				counter++;
+				if (counter > 100){
+				counter = 0;
+				output.send('noteoff', {
+				note: lastNote,
+				velocity: 127,
+				channel: 0
+			})
+			console.log('sent noteoff');
 		}
-	});
+	}*/
+} catch(e) {
+	console.log('MIDI output not possible: ' + e)
+}
+});
+socket.on('noteoff', function() {
+	try{
+		output.send('noteoff', {
+			note: lastNote,
+			velocity: 127,
+			channel: 0
+		})
+		lastNote = -1; // reset lastNote
+		console.log('sent noteoff');
+	} catch(e) {
+		console.log('MIDI output not possible: ' + e)
+	}});
 });
