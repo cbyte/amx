@@ -1,4 +1,4 @@
-var socket = io.connect('192.168.178.38'); // server address
+var socket = io.connect(window.location.hostname); // server address
 var touchdown = false
 var attachFastClick = Origami.fastclick;
 attachFastClick(document.body);
