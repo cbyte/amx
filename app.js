@@ -39,8 +39,9 @@ app.use(express.static(__dirname + '/public'));
 var lastNote;
 
 io.on('connection', function(socket) {
-    assignToInstrument(socket.id);
     console.log(socket.id+" connected");
+    socket.assignedInstrument = assignToInstrument(socket.id);
+    console.log('Instrument ' + socket.assignedInstrument + ' assigned')
 
     socket.on('disconnect', function() {
         quitInstrument(socket.id);
@@ -57,12 +58,12 @@ io.on('connection', function(socket) {
                 output.send('noteon', {
                     note: currentNote,
                     velocity: 127,
-                    channel: 0
+                    channel: socket.assignedInstrument
                 })
                 output.send('noteoff', {
                     note: lastNote,
                     velocity: 127,
-                    channel: 0
+                    channel: socket.assignedInstrument
                 })
                 lastNote = currentNote;
                 console.log('sent noteon');
@@ -77,7 +78,7 @@ io.on('connection', function(socket) {
             output.send('noteoff', {
                 note: lastNote,
                 velocity: 127,
-                channel: 0
+                channel: socket.assignedInstrument
             })
 
             lastNote = -1; // reset lastNote
@@ -88,22 +89,24 @@ io.on('connection', function(socket) {
     });
 });
 
-
 function assignToInstrument(uid) {
-    assigned = false;
+    var assigned = -1;
 
-    for(var instrument of instruments) {
-        if(instrument.length>0) {
+    for(var instrument in instruments) {
+        if(instruments[instrument].length>0) {
             continue;
         }
-        instrument = [uid];
-        assigned = true;
+        instruments[instrument] = [uid];
+        assigned = instrument;
         break;
     }
     
-    if(!assigned) {
-        instruments[Math.floor(Math.random()*16)].push(uid)
+    if(assigned<0) {
+        assigned = Math.floor(Math.random()*16);
+        instruments[assigned].push(uid)
     }
+
+    return assigned;
 }
 
 function quitInstrument(uid) {
@@ -114,16 +117,4 @@ function quitInstrument(uid) {
             }
         }
     }
-}
-
-function findInstrument(uid) {
-    for(var instrument in instruments) {
-        for(var user of instruments[instrument]) {
-            if(uid===user) {
-                return instrument;
-            }
-        }
-    }
-
-    return -1;
 }
