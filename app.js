@@ -36,11 +36,10 @@ app.get('/', function(req,res){
 
 app.use(express.static(__dirname + '/public'));
 
-var lastNote;
-
 io.on('connection', function(socket) {
     console.log(socket.id+" connected");
     socket.assignedInstrument = assignToInstrument(socket.id);
+    socket.lastNote = -1;
     console.log('Instrument ' + socket.assignedInstrument + ' assigned')
 
     socket.on('disconnect', function() {
@@ -54,18 +53,18 @@ io.on('connection', function(socket) {
         var currentNote = Math.round(63 + data.pitch/2.8125) // 180/64
 
         try {
-            if (lastNote != currentNote){
+            if (socket.lastNote != currentNote){
                 output.send('noteon', {
                     note: currentNote,
                     velocity: 127,
                     channel: socket.assignedInstrument
                 })
                 output.send('noteoff', {
-                    note: lastNote,
+                    note: socket.lastNote,
                     velocity: 127,
                     channel: socket.assignedInstrument
                 })
-                lastNote = currentNote;
+                socket.lastNote = currentNote;
                 console.log('sent noteon');
             }
         } catch(e) {
@@ -76,12 +75,12 @@ io.on('connection', function(socket) {
     socket.on('noteoff', function() {
         try {
             output.send('noteoff', {
-                note: lastNote,
+                note: socket.lastNote,
                 velocity: 127,
                 channel: socket.assignedInstrument
             })
 
-            lastNote = -1; // reset lastNote
+            socket.lastNote = -1; // reset lastNote
             console.log('sent noteoff');
         } catch(e) {
             console.log('MIDI output not possible: ' + e)
@@ -106,7 +105,7 @@ function assignToInstrument(uid) {
         instruments[assigned].push(uid)
     }
 
-    return assigned;
+    return parseInt(assigned);
 }
 
 function quitInstrument(uid) {
