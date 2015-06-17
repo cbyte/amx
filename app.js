@@ -9,30 +9,30 @@ var instruments = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
 
 /*
 Log all MIDI devices to the console and select the proper device by accessing
-the correct array entry (use outputs[x], where x is the entry number).
-On Windows the first device is the 'Microsoft GS Wavetable Synth', which is
-useless. Instead, select the second device.
-Hint: If there is no second device, the app will crash.
+the correct device (set midiDEviceID = x, where x is the device you want to
+use). On Windows the first device is the 'Microsoft GS Wavetable Synth' which
+is useless. Instead, select at least the second device.
+Hint: If there is no second device, the app will not be able to send MIDI data.
 Use a Virtual MIDI device, e.g. loopmidi
 */
-var midiDeviceID = 1; // edit ID to use the desired device
+var midiDeviceID = 2; // edit ID here to use the desired device
 var outputs = midi.getOutputs();
-console.log('Connected MIDI-interfaces: ' + outputs)
+console.log('Connected MIDI-interfaces: ' + outputs);
 
 try {
-    var output = new midi.Output(outputs[midiDeviceID], false)
-    console.log('Using ' + outputs[midiDeviceID] + ' as MIDI-output-interface.')
+    var output = new midi.Output(outputs[midiDeviceID], false);
+    console.log('Using ' + outputs[midiDeviceID] + ' as MIDI-output-interface.');
 } catch(e) {
-    console.log('MIDI-output ' + midiDeviceID + ' could not be initiated. ' + e)
+    console.log('MIDI-output ' + midiDeviceID + ' could not be initiated. ' + e);
 }
 
 server.listen(80);
 console.log('Listening on Port 80.');
-
+io.set('heartbeat timeout', 10);
 
 app.get('/', function(req,res){
     res.sendFile(__dirname + '/public/index.html');
-})
+});
 
 app.use(express.static(__dirname + '/public'));
 
@@ -40,17 +40,28 @@ io.on('connection', function(socket) {
     console.log(socket.id+" connected");
     socket.assignedInstrument = assignToInstrument(socket.id);
     socket.lastNote = -1;
-    console.log('Instrument ' + socket.assignedInstrument + ' assigned')
+    console.log('Instrument ' + socket.assignedInstrument + ' assigned');
 
     socket.on('disconnect', function() {
-        quitInstrument(socket.id);
-    })
+        // turn all notes off on the instrument's channel
+        try {
+            output.send('cc', {
+                controller: 123,
+                value: 0,
+                channel: socket.assignedInstrument
+            });
+            console.log('sent all notes off on channel ' + socket.assignedInstrument);
+        } catch (e) {
+            console.log('MIDI output not possible: ' + e);
+        }
+        quitInstrument(socket.id); // remove instrument assignment
+    });
 
     socket.on('orientation', function (data) {
         console.log('received orientation data');
         console.dir(data);
 
-        var currentNote = Math.round(63 + data.pitch/2.8125) // 180/64
+        var currentNote = Math.round(63 + data.pitch/2.8125); // 180/64
 
         try {
             if (socket.lastNote != currentNote){
@@ -58,32 +69,31 @@ io.on('connection', function(socket) {
                     note: currentNote,
                     velocity: 127,
                     channel: socket.assignedInstrument
-                })
+                });
                 output.send('noteoff', {
                     note: socket.lastNote,
-                    velocity: 127,
+                    velocity: 0,
                     channel: socket.assignedInstrument
-                })
+                });
                 socket.lastNote = currentNote;
                 console.log('sent noteon');
             }
         } catch(e) {
-            console.log('MIDI output not possible: ' + e)
+            console.log('MIDI output not possible: ' + e);
         }
     });
 
     socket.on('noteoff', function() {
         try {
-            output.send('noteoff', {
-                note: socket.lastNote,
-                velocity: 127,
+             output.send('cc', {
+                controller: 123,
+                value: 0,
                 channel: socket.assignedInstrument
-            })
-
+            });
+            console.log('sent all notes off on channel ' + socket.assignedInstrument);
             socket.lastNote = -1; // reset lastNote
-            console.log('sent noteoff');
         } catch(e) {
-            console.log('MIDI output not possible: ' + e)
+            console.log('MIDI output not possible: ' + e);
         }
     });
 });
@@ -99,10 +109,10 @@ function assignToInstrument(uid) {
         assigned = instrument;
         break;
     }
-    
+
     if(assigned<0) {
         assigned = Math.floor(Math.random()*16);
-        instruments[assigned].push(uid)
+        instruments[assigned].push(uid);
     }
 
     return parseInt(assigned);

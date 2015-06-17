@@ -1,41 +1,41 @@
 var socket = io.connect(window.location.hostname);
-var touchdown = false
+var touchdown = false;
 var attachFastClick = Origami.fastclick;
 attachFastClick(document.body);
 
 if (window.DeviceOrientationEvent) {
   window.addEventListener('deviceorientation', handlerDeviceOrientation, false);
 } else {
-  document.getElementById("logOrientation").innerHTML = "Error: No Device Orientation API"
+  document.getElementById("logOrientation").innerHTML = "Error: No Device Orientation API";
 }
 
 if (window.DeviceMotionEvent) {
   window.addEventListener('devicemotion', handlerDeviceMotion, false);
 } else {
-  document.getElementById("logMotion").innerHTML = "Error: No Device Motion API"
+  document.getElementById("logMotion").innerHTML = "Error: No Device Motion API";
 }
 
 window.addEventListener('pointerdown', function(e) {
   e.preventDefault();
-  touchdown = true
-  document.getElementById("touchState").innerHTML = "pointerdown"
-}, false)
+  touchdown = true;
+  document.getElementById("touchState").innerHTML = "pointerdown";
+}, false);
 
 window.addEventListener('pointerup', function(e) {
   e.preventDefault();
-  touchdown = false
-  socket.emit('noteoff')
-  document.getElementById("touchState").innerHTML = "pointerup"
-}, false)
+  touchdown = false;
+  socket.emit('noteoff');
+  document.getElementById("touchState").innerHTML = "pointerup";
+}, false);
 
 function handlerDeviceOrientation(e) {
   var debug = "roll:" + Math.round(e.gamma) + "\n"
             + "pitch: " + Math.round(e.beta) + "\n"
-            + "yaw: "+ Math.round(e.alpha) + "\n"
-  document.getElementById("logOrientation").innerHTML = debug
+            + "yaw: "+ Math.round(e.alpha) + "\n";
+  document.getElementById("logOrientation").innerHTML = debug;
   var h = Math.min(((e.alpha + 0.4 * e.beta - 0.4 * e.gamma)/360), 1);
-  var color = hslToHex(h, 1, 0.65) //"hsl("+h+", 100%, 65%);"
-  document.body.style.background = color
+  var color = hslToHex(h, 1, 0.65); //"hsl("+h+", 100%, 65%);"
+  document.body.style.background = color;
   if (touchdown == true) {
     socket.emit('orientation', {roll: Math.round(e.gamma),
                 pitch: Math.round(e.beta),
@@ -47,8 +47,8 @@ function handlerDeviceMotion(e) {
   var debug = "acceleration (X,Y,Z): " + Math.round(e.acceleration.x) + ", " + Math.round(e.acceleration.y)+ ", " + Math.round(e.acceleration.z) + "\n"
             + "acceleration with gravity (X,Y,Z): " + Math.round(e.accelerationIncludingGravity.x) + ", " + Math.round(e.accelerationIncludingGravity.y)+ ", " + Math.round(e.accelerationIncludingGravity.z) + "\n"
             + "rotation rate (X,Y,Z): " + Math.round(e.rotationRate.beta) + ', ' + Math.round(e.rotationRate.gamma) + ', ' + Math.round(e.rotationRate.alpha) + "\n"
-            + "refresh interval: " + e.interval
-  document.getElementById("logMotion").innerHTML = debug
+            + "refresh interval: " + e.interval;
+  document.getElementById("logMotion").innerHTML = debug;
 }
 
 /*
