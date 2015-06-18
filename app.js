@@ -15,7 +15,7 @@ is useless. Instead, select at least the second device.
 Hint: If there is no second device, the app will not be able to send MIDI data.
 Use a Virtual MIDI device, e.g. loopmidi
 */
-var midiDeviceID = 2; // edit ID here to use the desired device
+var midiDeviceID = 1; // edit ID here to use the desired device
 var outputs = midi.getOutputs();
 console.log('Connected MIDI-interfaces: ' + outputs);
 
@@ -40,7 +40,7 @@ io.on('connection', function(socket) {
     console.log(socket.id+" connected");
     socket.assignedInstrument = assignToInstrument(socket.id);
     socket.lastNote = -1;
-    console.log('Instrument ' + socket.assignedInstrument + ' assigned');
+    console.log('Instrument ' + (socket.assignedInstrument+1) + ' assigned');
 
     socket.on('disconnect', function() {
         // turn all notes off on the instrument's channel
@@ -50,7 +50,7 @@ io.on('connection', function(socket) {
                 value: 0,
                 channel: socket.assignedInstrument
             });
-            console.log('sent all notes off on channel ' + socket.assignedInstrument);
+            console.log('sent all notes off on channel ' + (socket.assignedInstrument+1));
         } catch (e) {
             console.log('MIDI output not possible: ' + e);
         }
@@ -90,7 +90,7 @@ io.on('connection', function(socket) {
                 value: 0,
                 channel: socket.assignedInstrument
             });
-            console.log('sent all notes off on channel ' + socket.assignedInstrument);
+            console.log('sent all notes off on channel ' + (socket.assignedInstrument+1));
             socket.lastNote = -1; // reset lastNote
         } catch(e) {
             console.log('MIDI output not possible: ' + e);
