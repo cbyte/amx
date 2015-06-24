@@ -5,6 +5,17 @@ var currentNote = -1;
 var attachFastClick = Origami.fastclick;
 attachFastClick(document.body);
 
+var width = window.innerWidth
+var height = window.innerHeight
+var centerX = width * 0.5
+var centerY = height * 0.5
+
+document.body.style.background = "#000"
+var paper = Raphael(0, 0, window.innerWidth, window.innerHeight);
+var circle = paper.circle(centerX, centerY, 10);
+
+var orientation;
+
 if (window.DeviceOrientationEvent) {
     window.addEventListener('deviceorientation', handlerDeviceOrientation, false);
 } else {
@@ -17,10 +28,21 @@ if (window.DeviceMotionEvent) {
     document.getElementById("logMotion").innerHTML = "Error: No Device Motion API";
 }
 
+var fadeToBlack = Raphael.animation({"fill": "#000"}, 1000)
+var fadeInWithColor = Raphael.animation({r: width*2}, 250)
+
 window.addEventListener('pointerdown', function (e) {
     e.preventDefault();
     touchdown = true;
     document.getElementById("touchState").innerHTML = "pointerdown";
+
+    var color = calcColor(orientation)
+
+    circle.attr("cx", e.pageX);
+    circle.attr("cy", e.pageY);
+    circle.attr("fill", color );
+    circle.attr("r",1)
+    circle.stop(fadeToBlack).animate(fadeInWithColor)
 }, false);
 
 window.addEventListener('pointerup', function (e) {
@@ -28,22 +50,29 @@ window.addEventListener('pointerup', function (e) {
     touchdown = false;
     socket.emit('noteoff');
     document.getElementById("touchState").innerHTML = "pointerup";
+    
+    circle.animate(fadeToBlack)
 }, false);
+
+function calcColor(orientation) {
+    var h = Math.min(((orientation.yaw + 0.4 * orientation.pitch - 0.4 * orientation.roll) / 360), 1);
+    return hslToHex(h, 1, 0.65);
+}
 
 function handlerDeviceOrientation(e) {
     var debug = "roll:" + Math.round(e.gamma) + "\n" + "pitch: " + Math.round(e.beta) + "\n" + "yaw: " + Math.round(e.alpha) + "\n";
     document.getElementById("logOrientation").innerHTML = debug;
-    var h = Math.min(((e.alpha + 0.4 * e.beta - 0.4 * e.gamma) / 360), 1);
-    var color = hslToHex(h, 1, 0.65); //"hsl("+h+", 100%, 65%);"
-    document.body.style.background = color;
+
+    orientation = {
+        roll: Math.round(e.gamma),
+        pitch: Math.round(e.beta),
+        yaw: Math.round(e.alpha)
+    };
+    
     currentNote = Math.round(e.beta);
     if (touchdown === true) {
         if (lastNote !== currentNote) {
-            socket.emit('orientation', {
-                roll: Math.round(e.gamma),
-                pitch: Math.round(e.beta),
-                yaw: Math.round(e.alpha)
-            });
+            socket.emit('orientation', orientation);
             lastNote = currentNote;
         }
     } else if (lastNote !== -1) {
