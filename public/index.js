@@ -16,8 +16,7 @@ document.body.style.background = "#000";
 var paper = Raphael(0, 0, window.innerWidth, window.innerHeight);
 var circle = paper.circle(centerX, centerY, 10);
 
-var instrumentName = "Cooles Instrument";
-document.getElementById("instrumentName").innerHTML = instrumentName;
+document.getElementById("instrumentName").innerHTML = '...';
 
 var orientation;
 
@@ -35,6 +34,14 @@ if (window.DeviceMotionEvent) {
 
 var fadeToBlack = Raphael.animation({"fill": "#000", "fill-opacity" : "0"}, 1000);
 var fadeInWithColor = Raphael.animation({r: width*2}, 250);
+
+socket.on('connect', function(){
+    socket.emit('hello-world', window.location.pathname.slice(1))
+})
+
+socket.on('instrument-granted', function(instrument){
+    document.getElementById('instrumentName').innerHTML = instrument;
+})
 
 window.addEventListener('pointerdown', function (e) {
     e.preventDefault();

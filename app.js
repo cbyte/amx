@@ -4,8 +4,8 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var midi = require('easymidi');
 
-
-var instruments = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]];
+var instruments = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
+var instrumentNames = ['DERP','BLASTER','WOBBLE','VORTEX','BLACKHOLE','DUST','FART','JULY','PHEW','WOUSH','ZZZRPP','WHEW','RAGE','DASH','ZYGLROX','BOOM']
 
 /*
 Log all MIDI devices to the console and select the proper device by accessing
@@ -30,17 +30,31 @@ server.listen(80);
 console.log('Listening on Port 80.');
 io.set('heartbeat timeout', 10);
 
-app.get('/', function(req,res){
+app.use(express.static(__dirname + '/public'));
+
+app.get('/*', function(req,res){
     res.sendFile(__dirname + '/public/index.html');
 });
 
-app.use(express.static(__dirname + '/public'));
-
 io.on('connection', function(socket) {
     console.log(socket.id+" connected");
-    socket.assignedInstrument = assignToInstrument(socket.id);
-    socket.lastNote = -1;
-    console.log('Instrument ' + (socket.assignedInstrument+1) + ' assigned');
+    
+
+    socket.on('hello-world', function(desiredInstrument){
+        console.log(socket.id +' wants '+desiredInstrument)
+        socket.assignedInstrument = assignToInstrument(socket.id, desiredInstrument);
+        socket.lastNote = -1;
+        console.log('Instrument ' + (socket.assignedInstrument+1) + ' assigned');
+
+        console.log('user joined')
+        console.dir(instruments)
+
+        if(socket.assignedInstrument>=0) {
+            socket.emit('instrument-granted', instrumentNames[socket.assignedInstrument]);
+        } else {
+            socket.emit('instrument-granted', 'no instrument available, try again later :)');
+        }
+    })
 
     socket.on('disconnect', function() {
         // turn all notes off on the instrument's channel
@@ -98,32 +112,40 @@ io.on('connection', function(socket) {
     });
 });
 
-function assignToInstrument(uid) {
-    var assigned = -1;
+function assignToInstrument(uid, desired) {
+    console.log('step 1')
 
-    for(var instrument in instruments) {
-        if(instruments[instrument].length>0) {
-            continue;
-        }
-        instruments[instrument] = [uid];
-        assigned = instrument;
-        break;
-    }
-
-    if(assigned<0) {
-        assigned = Math.floor(Math.random()*16);
-        instruments[assigned].push(uid);
-    }
-
-    return parseInt(assigned);
-}
-
-function quitInstrument(uid) {
-    for(var instrument in instruments) {
-        for(var user in instruments[instrument]) {
-            if(uid===instruments[instrument][user]) {
-                delete instruments[instrument][user];
+    if(desired!=='') {
+        console.log('desired: '+desired.toLowerCase())
+        for(var i in instrumentNames) {
+            console.log(instrumentNames[i])
+            if(desired.toLowerCase()==instrumentNames[i].toLowerCase() && instruments[i]==null) {
+                instruments[i] = uid;
+                return parseInt(i);
             }
         }
     }
+
+    console.log('step 2')
+
+    for(var i in instruments) {
+        if(instruments[i]!=null) {
+            instruments[i] = uid;
+            return parseInt(i);
+        }
+    }
+
+    return -1;
+}
+
+function quitInstrument(uid) {
+    for(var instrument of instruments) {
+        if(uid==instrument) {
+            instrument = null;
+            break;
+        }
+    }
+
+    console.log('user left')
+    console.dir(instruments)
 }
