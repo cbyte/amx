@@ -122,14 +122,23 @@ function assignToInstrument(uid, desired) {
         }
     }
 
+    solvable = false;
     for(var i in instruments) {
         if(instruments[i]==null) {
-            instruments[i] = uid;
-            return parseInt(i);
+            solvable = true;
         }
     }
+    if(!solvable) {
+        return -1;
+    }
 
-    return -1;
+    while(true) {
+        var id = Math.floor(Math.random()*16);
+        if(instruments[id]==null) {
+            instruments[id] = uid;
+            return id;
+        }
+    }
 }
 
 function quitInstrument(uid) {
