@@ -2,17 +2,22 @@ var socket = io.connect(window.location.hostname);
 var touchdown = false;
 var lastNote = -1;
 var currentNote = -1;
+var lastVelocity = -1;
+var currentVelocity = -1;
 var attachFastClick = Origami.fastclick;
 attachFastClick(document.body);
 
-var width = window.innerWidth
-var height = window.innerHeight
-var centerX = width * 0.5
-var centerY = height * 0.5
+var width = window.innerWidth;
+var height = window.innerHeight;
+var centerX = width * 0.5;
+var centerY = height * 0.5;
 
-document.body.style.background = "#000"
+document.body.style.background = "#000";
 var paper = Raphael(0, 0, window.innerWidth, window.innerHeight);
 var circle = paper.circle(centerX, centerY, 10);
+
+var instrumentName = "Cooles Instrument";
+document.getElementById("instrumentName").innerHTML = instrumentName;
 
 var orientation;
 
@@ -28,21 +33,22 @@ if (window.DeviceMotionEvent) {
     document.getElementById("logMotion").innerHTML = "Error: No Device Motion API";
 }
 
-var fadeToBlack = Raphael.animation({"fill": "#000"}, 1000)
-var fadeInWithColor = Raphael.animation({r: width*2}, 250)
+var fadeToBlack = Raphael.animation({"fill": "#000", "fill-opacity" : "0"}, 1000);
+var fadeInWithColor = Raphael.animation({r: width*2}, 250);
 
 window.addEventListener('pointerdown', function (e) {
     e.preventDefault();
     touchdown = true;
     document.getElementById("touchState").innerHTML = "pointerdown";
 
-    var color = calcColor(orientation)
+    var color = calcColor(orientation);
 
     circle.attr("cx", e.pageX);
     circle.attr("cy", e.pageY);
     circle.attr("fill", color );
-    circle.attr("r",1)
-    circle.stop(fadeToBlack).animate(fadeInWithColor)
+    circle.attr("fill-opacity", 1);
+    circle.attr("r",1);
+    circle.stop(fadeToBlack).animate(fadeInWithColor);
 }, false);
 
 window.addEventListener('pointerup', function (e) {
@@ -50,8 +56,9 @@ window.addEventListener('pointerup', function (e) {
     touchdown = false;
     socket.emit('noteoff');
     document.getElementById("touchState").innerHTML = "pointerup";
-    
-    circle.animate(fadeToBlack)
+
+    circle.animate(fadeToBlack);
+
 }, false);
 
 function calcColor(orientation) {
@@ -68,24 +75,27 @@ function handlerDeviceOrientation(e) {
         pitch: Math.round(e.beta),
         yaw: Math.round(e.alpha)
     };
-    
+
     currentNote = Math.round(e.beta);
+    currentVelocity= Math.round(e.gamma);
     if (touchdown === true) {
-        if (lastNote !== currentNote) {
+        if (lastNote !== currentNote && lastVelocity != currentVelocity) {
             socket.emit('orientation', orientation);
             lastNote = currentNote;
+            lastVelocity = currentVelocity;
         }
     } else if (lastNote !== -1) {
         socket.emit('noteoff');
         lastNote = -1;
+        lastVelocity = -1;
     }
 }
 
 function handlerDeviceMotion(e) {
-    var debug = "acceleration (X,Y,Z): " + Math.round(e.acceleration.x) + ", " + Math.round(e.acceleration.y) + ", " + Math.round(e.acceleration.z) + "\n"
-              + "acceleration with gravity (X,Y,Z): " + Math.round(e.accelerationIncludingGravity.x) + ", " + Math.round(e.accelerationIncludingGravity.y) + ", " + Math.round(e.accelerationIncludingGravity.z) + "\n"
-              + "rotation rate (X,Y,Z): " + Math.round(e.rotationRate.beta) + ', ' + Math.round(e.rotationRate.gamma) + ', ' + Math.round(e.rotationRate.alpha) + "\n"
-              + "refresh interval: " + e.interval;
+    var debug = "acceleration (X,Y,Z): " + Math.round(e.acceleration.x) + ", " + Math.round(e.acceleration.y) + ", " + Math.round(e.acceleration.z) + "\n" +
+                "acceleration with gravity (X,Y,Z): " + Math.round(e.accelerationIncludingGravity.x) + ", " + Math.round(e.accelerationIncludingGravity.y) + ", " + Math.round(e.accelerationIncludingGravity.z) + "\n" +
+                "rotation rate (X,Y,Z): " + Math.round(e.rotationRate.beta) + ', ' + Math.round(e.rotationRate.gamma) + ', ' + Math.round(e.rotationRate.alpha) + "\n" +
+                "refresh interval: " + e.interval;
     document.getElementById("logMotion").innerHTML = debug;
 }
 

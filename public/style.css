@@ -1,0 +1,15 @@
+@font-face {
+    font-family: 'roboto_slabbold';
+    src: url('fonts/RobotoSlab-Bold-webfont.eot');
+    src: url('fonts/RobotoSlab-Bold-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/RobotoSlab-Bold-webfont.woff') format('woff'),
+         url('fonts/RobotoSlab-Bold-webfont.ttf') format('truetype'),
+         url('fonts/RobotoSlab-Bold-webfont.svg#roboto_slabbold') format('svg');
+}
+
+.instrument-name {
+  font-size: 2em;
+  font-family: 'roboto_slabbold';
+  color: white;
+  text-align: center;
+}
