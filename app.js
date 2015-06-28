@@ -38,7 +38,7 @@ app.get('/*', function(req,res){
 
 io.on('connection', function(socket) {
     console.log(socket.id+" connected");
-    
+
 
     socket.on('hello-world', function(desiredInstrument){
         console.log(socket.id +' wants '+desiredInstrument)
@@ -52,7 +52,7 @@ io.on('connection', function(socket) {
         if(socket.assignedInstrument>=0) {
             socket.emit('instrument-granted', instrumentNames[socket.assignedInstrument]);
         } else {
-            socket.emit('instrument-granted', 'no instrument available, try again later :)');
+            socket.emit('instrument-granted', 'no instrument available<br/><br/>try again later :)');
         }
     })
 
