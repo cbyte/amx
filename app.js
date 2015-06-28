@@ -113,20 +113,14 @@ io.on('connection', function(socket) {
 });
 
 function assignToInstrument(uid, desired) {
-    console.log('step 1')
-
     if(desired!=='') {
-        console.log('desired: '+desired.toLowerCase())
         for(var i in instrumentNames) {
-            console.log(instrumentNames[i])
             if(desired.toLowerCase()==instrumentNames[i].toLowerCase() && instruments[i]==null) {
                 instruments[i] = uid;
                 return parseInt(i);
             }
         }
     }
-
-    console.log('step 2')
 
     for(var i in instruments) {
         if(instruments[i]!=null) {
