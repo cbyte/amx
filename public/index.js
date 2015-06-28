@@ -4,6 +4,8 @@ var lastNote = -1;
 var currentNote = -1;
 var lastVelocity = -1;
 var currentVelocity = -1;
+var orientationData = { 'roll': 0, 'pitch': 0, 'yaw': 0 };
+
 var attachFastClick = Origami.fastclick;
 attachFastClick(document.body);
 
@@ -18,7 +20,13 @@ var circle = paper.circle(centerX, centerY, 10);
 
 document.getElementById("instrumentName").innerHTML = '...';
 
-var orientation;
+socket.on('connect', function(){
+    socket.emit('hello-world', window.location.pathname.slice(1))
+});
+
+socket.on('instrument-granted', function(instrument){
+    document.getElementById('instrumentName').innerHTML = instrument;
+});
 
 if (window.DeviceOrientationEvent) {
     window.addEventListener('deviceorientation', handlerDeviceOrientation, false);
@@ -35,20 +43,12 @@ if (window.DeviceMotionEvent) {
 var fadeToBlack = Raphael.animation({"fill": "#000", "fill-opacity" : "0"}, 1000);
 var fadeInWithColor = Raphael.animation({r: width*2}, 250);
 
-socket.on('connect', function(){
-    socket.emit('hello-world', window.location.pathname.slice(1))
-})
-
-socket.on('instrument-granted', function(instrument){
-    document.getElementById('instrumentName').innerHTML = instrument;
-})
-
 window.addEventListener('pointerdown', function (e) {
     e.preventDefault();
     touchdown = true;
     document.getElementById("touchState").innerHTML = "pointerdown";
 
-    var color = calcColor(orientation);
+    var color = calcColor(orientationData);
 
     circle.attr("cx", e.pageX);
     circle.attr("cy", e.pageY);
@@ -76,19 +76,19 @@ function handlerDeviceOrientation(e) {
     var debug = "roll:" + Math.round(e.gamma) + "\n" + "pitch: " + Math.round(e.beta) + "\n" + "yaw: " + Math.round(e.alpha) + "\n";
     document.getElementById("logOrientation").innerHTML = debug;
 
-    orientation = {
-        roll: Math.round(e.gamma),
-        pitch: Math.round(e.beta),
-        yaw: Math.round(e.alpha)
+    orientationData = {
+        'roll': Math.round(e.gamma),
+        'pitch': Math.round(e.beta),
+        'yaw': Math.round(e.alpha)
     };
 
-    var fadeToColor = Raphael.animation({"fill": calcColor(orientation)}, 0);
+    var fadeToColor = Raphael.animation({"fill": calcColor(orientationData)}, 0);
 
     currentNote = Math.round(e.beta);
     currentVelocity= Math.round(e.gamma);
     if (touchdown === true) {
         if ((lastNote !== currentNote) && (lastVelocity != currentVelocity)) {
-            socket.emit('orientation', orientation);
+            socket.emit('orientation', orientationData);
             lastNote = currentNote;
             lastVelocity = currentVelocity;
         }
