@@ -5,7 +5,7 @@ var io = require('socket.io')(server);
 var midi = require('easymidi');
 
 var instruments = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
-var instrumentNames = ['DERP','BLASTER','WOBBLE','VORTEX','BLACKHOLE','DUST','FART','JULY','PHEW','WOUSH','ZZZRPP','WHEW','RAGE','DASH','ZYGLROX','BOOM']
+var instrumentNames = ['DERP','BLASTER','WOBBLE','VORTEX','BLACKHOLE','DUST','FART','JULY','PHEW','WOUSH','ZZZRPP','WHEW','RAGE','DASH','ZYGLROX','BOOM'];
 
 /*
 Log all MIDI devices to the console and select the proper device by accessing
@@ -41,20 +41,20 @@ io.on('connection', function(socket) {
 
 
     socket.on('hello-world', function(desiredInstrument){
-        console.log(socket.id +' wants '+desiredInstrument)
+        console.log(socket.id +' wants '+desiredInstrument);
         socket.assignedInstrument = assignToInstrument(socket.id, desiredInstrument);
         socket.lastNote = -1;
         console.log('Instrument ' + (socket.assignedInstrument+1) + ' assigned');
 
-        console.log('user joined')
-        console.dir(instruments)
+        console.log('user joined');
+        console.dir(instruments);
 
         if(socket.assignedInstrument>=0) {
             socket.emit('instrument-granted', instrumentNames[socket.assignedInstrument]);
         } else {
             socket.emit('instrument-granted', 'no instrument available<br/><br/>try again later :)');
         }
-    })
+    });
 
     socket.on('disconnect', function() {
         // turn all notes off on the instrument's channel
@@ -75,13 +75,14 @@ io.on('connection', function(socket) {
         console.log('received orientation data');
         console.dir(data);
 
-        var currentNote = Math.round(63 + data.pitch/2.8125); // 180/64
+        var currentNote = 84 + Math.round(data.pitch/6); // 180/64
+        var velocity = 63 - Math.round(data.roll/2.8125);
 
         try {
             if (socket.lastNote != currentNote){
                 output.send('noteon', {
                     note: currentNote,
-                    velocity: 127,
+                    velocity: velocity,
                     channel: socket.assignedInstrument
                 });
                 output.send('noteoff', {
@@ -149,6 +150,6 @@ function quitInstrument(uid) {
         }
     }
 
-    console.log('user left')
-    console.dir(instruments)
+    console.log('user left');
+    console.dir(instruments);
 }

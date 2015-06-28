@@ -21,7 +21,7 @@ var circle = paper.circle(centerX, centerY, 10);
 document.getElementById("instrumentName").innerHTML = '...';
 
 socket.on('connect', function(){
-    socket.emit('hello-world', window.location.pathname.slice(1))
+    socket.emit('hello-world', window.location.pathname.slice(1));
 });
 
 socket.on('instrument-granted', function(instrument){
@@ -87,7 +87,7 @@ function handlerDeviceOrientation(e) {
     currentNote = Math.round(e.beta);
     currentVelocity= Math.round(e.gamma);
     if (touchdown === true) {
-        if ((lastNote !== currentNote) && (lastVelocity != currentVelocity)) {
+        if ((lastNote != currentNote) && (lastVelocity != currentVelocity)) {
             socket.emit('orientation', orientationData);
             lastNote = currentNote;
             lastVelocity = currentVelocity;
