@@ -133,9 +133,9 @@ function assignToInstrument(uid, desired) {
 }
 
 function quitInstrument(uid) {
-    for(var instrument of instruments) {
-        if(uid==instrument) {
-            instrument = null;
+    for(var i in instruments) {
+        if(uid==instruments[i]) {
+            instruments[i] = null;
             break;
         }
     }
