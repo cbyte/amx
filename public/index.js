@@ -1,4 +1,7 @@
 var socket = io.connect(window.location.hostname);
+
+var debug = false;
+
 var touchdown = false;
 var lastNote = -1;
 var currentNote = -1;
@@ -24,20 +27,14 @@ socket.on('connect', function(){
     socket.emit('hello-world', window.location.pathname.slice(1));
 });
 
-socket.on('instrument-granted', function(instrument){
-    document.getElementById('instrumentName').innerHTML = instrument;
+socket.on('instrument-granted', function(instrument) {
+    if(window.DeviceOrientationEvent) {
+        document.getElementById('instrumentName').innerHTML = instrument;
+    }
 });
 
 if (window.DeviceOrientationEvent) {
     window.addEventListener('deviceorientation', handlerDeviceOrientation, false);
-} else {
-    document.getElementById("logOrientation").innerHTML = "Error: No Device Orientation API";
-}
-
-if (window.DeviceMotionEvent) {
-    window.addEventListener('devicemotion', handlerDeviceMotion, false);
-} else {
-    document.getElementById("logMotion").innerHTML = "Error: No Device Motion API";
 }
 
 var fadeToBlack = Raphael.animation({"fill": "#000", "fill-opacity" : "0"}, 1000);
@@ -73,8 +70,10 @@ function calcColor(orientation) {
 }
 
 function handlerDeviceOrientation(e) {
-    var debug = "roll:" + Math.round(e.gamma) + "\n" + "pitch: " + Math.round(e.beta) + "\n" + "yaw: " + Math.round(e.alpha) + "\n";
-    document.getElementById("logOrientation").innerHTML = debug;
+    if (debug) {
+        var debug = "roll:" + Math.round(e.gamma) + "\n" + "pitch: " + Math.round(e.beta) + "\n" + "yaw: " + Math.round(e.alpha) + "\n";
+        document.getElementById("logOrientation").innerHTML = debug;
+    }
 
     orientationData = {
         'roll': Math.round(e.gamma),
@@ -98,12 +97,4 @@ function handlerDeviceOrientation(e) {
         lastNote = -1;
         lastVelocity = -1;
     }
-}
-
-function handlerDeviceMotion(e) {
-    var debug = "acceleration (X,Y,Z): " + Math.round(e.acceleration.x) + ", " + Math.round(e.acceleration.y) + ", " + Math.round(e.acceleration.z) + "\n" +
-                "acceleration with gravity (X,Y,Z): " + Math.round(e.accelerationIncludingGravity.x) + ", " + Math.round(e.accelerationIncludingGravity.y) + ", " + Math.round(e.accelerationIncludingGravity.z) + "\n" +
-                "rotation rate (X,Y,Z): " + Math.round(e.rotationRate.beta) + ', ' + Math.round(e.rotationRate.gamma) + ', ' + Math.round(e.rotationRate.alpha) + "\n" +
-                "refresh interval: " + e.interval;
-    document.getElementById("logMotion").innerHTML = debug;
 }
