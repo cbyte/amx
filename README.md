@@ -1,6 +1,6 @@
 # Zukunftsmusik
-Zukunftsmusik (part of the German idiom *Zukunftsmusik sein*, somewhat comparable to the idiom *to be still a long way off*, consisting of the words *Zukunft = future* and *Musik = music*) is an interactive installation that aims provide an environment where the visitors can create unique soundscapes together - by moving their smartphones every user can actively manipulate the ambients sounds. In their role as performers, the participants themselves become a part of this artistic experience.
-This project is being developed in the course *Computer- und Medienkunst* at the University of Lubeque by master's degree students of the major *Digital Media*.
+Zukunftsmusik (part of the German idiom *Zukunftsmusik sein*, somewhat comparable to the idiom *to be still a long way off*, consisting of the words *Zukunft = future* and *Musik = music*) is an interactive installation that aims to provide an environment where the visitors can create unique soundscapes together - by moving their smartphones every user can actively manipulate the ambients sounds. In their role as performers, the participants themselves become a part of this artistic experience.
+This project is being developed in the course *Computer- und Medienkunst* at the University of Lübeck by master's degree students of the major *Digital Media*.
 
 
 # How does it work?
@@ -15,24 +15,24 @@ Of course, there are a few things to consider:
 
 # Usage
 ## Installation
-This package runs on node.js, hence your can install this package by running `npm start`.
+This package runs on node.js, hence your can install this package's dependencies by running `npm install`.
 
 ### Prerequisites for easymidi
 For the installation, a few things are required depending on the OS you are using.
 
 #### OSX
-Some version of Xcode (or Command Line Tools)
-Python (for node-gyp)
+- Some version of Xcode (or Command Line Tools)
+- Python 2 for node-gyp (2.7 recommended), Python 3.x is not supported
 
 #### Windows
-Microsoft Visual C++ (e.g. by installing Visual Studio 2013 Community Edition)
-Python (for node-gyp)
+- Microsoft Visual C++ (e.g. by installing Visual Studio 2013 Community Edition)
+- Python 2 for node-gyp (2.7.3 recommended), Python 3.x is not supported
 
 #### Linux
-A C++ compiler
-You must have installed and configured ALSA. Without it this module will NOT build.
+- A C++ compiler
+-Y ou must have installed and configured ALSA. Without it this module will NOT build.
 Install the libasound2-dev package.
-Python (for node-gyp)
+- Python 2 for node-gyp (2.7 recommended), Python 3.x is not supported
 
 ## Configuration
 ### MIDI device
@@ -47,4 +47,4 @@ After the system is installed and configured, you can start the server by runnin
 Once the server has started then you can connect to the server by visiting `server-ip` or `server-ip/instrument-name` in your smartphone's browser, where server-ip is the IP address of the computer the server is running on, and the instrument-name is the name of the instrument you want to use. An instrument can only be assigned to one user at the same time. If the instrument already has been assigned, a different instrument will be randomly assigned to your smartphone. This will also happen if you choose to not specify an instrument name.
 
 ## Known issues
-The IE11 on Windows Phone 8.1 currently has a bug which prevents playing an instrument as long as your finger is touching the phone's screen. Independently from your actions, the browser will fire the *pointerUp* event after a short amount of time even when the finger has not been lifted from the screen. This event triggers the noteOff message.
+The IE11 on Windows Phone 8.1 currently has a bug which prevents playing an instrument for the total amount of time that your finger is touching the phone's screen. Independently from your actions, the browser will fire the *pointerUp* event after a short amount of time even when the finger has not been lifted from the screen. This event triggers the noteOff message, ultimately resulting in the sound generation to be stopped.

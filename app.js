@@ -5,7 +5,7 @@ var io = require('socket.io')(server);
 var midi = require('easymidi');
 
 var instruments = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
-var instrumentNames = ['DERP','BLASTER','WOBBLE','VORTEX','BLACKHOLE','DUST','FART','JULY','PHEW','WOUSH','ZZZRPP','WHEW','RAGE','DASH','ZYGLROX','BOOM'];
+var instrumentNames = ['SPACE', 'MAD', 'POING', 'BUBBLES', 'WARP', 'CHAKRA', 'ORGANA', 'UNSTABLE', 'AMNESIA', 'ATMOS', 'AZTEC', 'BEACH', 'TERRA', 'ETHER', 'FINE', 'FOREST'];
 
 /*
 Log all MIDI devices to the console and select the proper device by accessing
