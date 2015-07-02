@@ -28,7 +28,8 @@ try {
 
 server.listen(80);
 console.log('Listening on Port 80.');
-io.set('heartbeat timeout', 10);
+io.set('heartbeat timeout', 10000);
+io.set('heartbeat interval', 1000);
 
 app.use(express.static(__dirname + '/public'));
 
