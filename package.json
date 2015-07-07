@@ -1,6 +1,6 @@
 {
-  "name": "ambient-musix",
-  "version": "0.0.1",
+  "name": "zukunftsmusik",
+  "version": "1.0.0",
   "description": "Ambient Music, yay!",
   "scripts": {
     "start": "node app.js"
