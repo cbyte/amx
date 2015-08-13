@@ -76,7 +76,21 @@ io.on('connection', function(socket) {
         console.log('received orientation data');
         console.dir(data);
 
-        var currentNote = 84 + Math.round(data.pitch/6); // 180/64
+        /*
+        Map device pitch to a total of 5 octaves (in total 60 values): c3 to b7.
+        Only pitch values from -35 degrees to 145 degrees should be mapped,
+        everything beyond that should be mapped to the boundaries.
+        c3 = 48 ^= -35 degrees
+        d#4 = 63 ^= 0 degrees
+        b7 = 107 ^= 135 degrees
+        */
+        var currentNote = 63;
+        if (data.pitch >= 0)  {
+          currentNote += Math.min(Math.round(data.pitch/3), 44);
+        } else if (data.pitch < 0) {
+          currentNote += Math.max(Math.round(data.pitch/3), -15);
+        }
+
         var velocity = 63 - Math.round(data.roll/2.8125);
 
         try {
@@ -115,9 +129,9 @@ io.on('connection', function(socket) {
 });
 
 function assignToInstrument(uid, desired) {
-    if(desired!='') {
+    if(desired !== '') {
         for(var i in instrumentNames) {
-            if(desired.toLowerCase()==instrumentNames[i].toLowerCase() && instruments[i]==null) {
+            if(desired.toLowerCase()==instrumentNames[i].toLowerCase() && instruments[i] === null) {
                 instruments[i] = uid;
                 return parseInt(i);
             }
@@ -125,8 +139,8 @@ function assignToInstrument(uid, desired) {
     }
 
     solvable = false;
-    for(var i in instruments) {
-        if(instruments[i]==null) {
+    for(var j in instruments) {
+        if(instruments[j] === null) {
             solvable = true;
         }
     }
@@ -136,7 +150,7 @@ function assignToInstrument(uid, desired) {
 
     while(true) {
         var id = Math.floor(Math.random()*16);
-        if(instruments[id]==null) {
+        if(instruments[id] === null) {
             instruments[id] = uid;
             return id;
         }
@@ -145,7 +159,7 @@ function assignToInstrument(uid, desired) {
 
 function quitInstrument(uid) {
     for(var i in instruments) {
-        if(uid==instruments[i]) {
+        if(uid === instruments[i]) {
             instruments[i] = null;
             break;
         }
