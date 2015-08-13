@@ -80,7 +80,7 @@ io.on('connection', function(socket) {
         Map device pitch to a total of 5 octaves (in total 60 values): c3 to b7.
         Only pitch values from -35 degrees to 145 degrees should be mapped,
         everything beyond that should be mapped to the boundaries.
-        c3 = 48 ^= -35 degrees
+        c3 = 48 ^= -45 degrees
         d#4 = 63 ^= 0 degrees
         b7 = 107 ^= 135 degrees
         */
